@@ -114,10 +114,15 @@ class CarDisplayController(private val carContext: CarContext) :
     }
 
     override fun onScale(focusX: Float, focusY: Float, scaleFactor: Float) {
-        // Pinch on a video switches between "fit" and "fill the screen".
-        if (mode != CarMode.VIDEO) return
-        if (scaleFactor > 1.05f && !isZoomed) setZoom(true)
-        if (scaleFactor < 0.95f && isZoomed) setZoom(false)
+        when (mode) {
+            // Pinch on a video switches between "fit" and "fill the screen".
+            CarMode.VIDEO -> {
+                if (scaleFactor > 1.05f && !isZoomed) setZoom(true)
+                if (scaleFactor < 0.95f && isZoomed) setZoom(false)
+            }
+            CarMode.WEB -> presentation?.webZoom(scaleFactor)
+            else -> Unit
+        }
     }
 
     // endregion

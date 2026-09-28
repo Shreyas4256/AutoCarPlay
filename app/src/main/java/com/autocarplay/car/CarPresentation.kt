@@ -206,6 +206,12 @@ class CarPresentation(
         webView?.reload()
     }
 
+    /** Pinch zoom on web pages. */
+    fun webZoom(scaleFactor: Float) {
+        if (mode != CarMode.WEB || fullscreenView != null) return
+        webView?.zoomBy(scaleFactor.coerceIn(0.5f, 2f))
+    }
+
     /** Replays a tap from the car touch screen. */
     fun injectTap(x: Float, y: Float) {
         if (!created) return
@@ -221,9 +227,12 @@ class CarPresentation(
         }, TAP_DURATION_MS)
     }
 
-    /** Replays a drag from the car touch screen. Distances follow GestureDetector conventions. */
+    /**
+     * Replays a drag from the car touch screen. Distances follow GestureDetector conventions.
+     * Only web pages and the mirrored phone scroll; the video and home views ignore drags.
+     */
     fun injectScroll(distanceX: Float, distanceY: Float) {
-        if (!created) return
+        if (!created || (mode != CarMode.WEB && mode != CarMode.MIRROR)) return
         val target = window?.decorView ?: return
         val width = target.width.toFloat()
         val height = target.height.toFloat()
@@ -384,9 +393,22 @@ class CarPresentation(
         return PointF(nx, ny)
     }
 
+    /** Sends one finger touch event, shaped like one from a real touch screen. */
     private fun dispatch(target: View, action: Int, x: Float, y: Float, downTime: Long, eventTime: Long) {
-        val event = MotionEvent.obtain(downTime, eventTime, action, x, y, 0)
-        event.source = InputDevice.SOURCE_TOUCHSCREEN
+        val properties = MotionEvent.PointerProperties().apply {
+            id = 0
+            toolType = MotionEvent.TOOL_TYPE_FINGER
+        }
+        val coords = MotionEvent.PointerCoords().apply {
+            this.x = x
+            this.y = y
+            pressure = 1f
+            size = 1f
+        }
+        val event = MotionEvent.obtain(
+            downTime, eventTime, action, 1, arrayOf(properties), arrayOf(coords),
+            0, 0, 1f, 1f, 0, 0, InputDevice.SOURCE_TOUCHSCREEN, 0,
+        )
         target.dispatchTouchEvent(event)
         event.recycle()
     }
