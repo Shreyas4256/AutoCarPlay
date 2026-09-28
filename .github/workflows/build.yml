@@ -1,0 +1,48 @@
+name: Build APK
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - uses: gradle/actions/setup-gradle@v4
+
+      - name: Unit tests and APK
+        run: ./gradlew --no-daemon testReleaseUnitTest assembleRelease
+
+      - name: Collect APK
+        run: cp app/build/outputs/apk/release/*.apk AutoCarPlay.apk
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: AutoCarPlay-apk
+          path: AutoCarPlay.apk
+
+      # A pre-release per branch gives a direct download link that works on the phone.
+      - name: Publish download link
+        if: github.event_name != 'pull_request'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          TAG="apk-${GITHUB_REF_NAME//\//-}"
+          gh release delete "$TAG" --yes --cleanup-tag || true
+          gh release create "$TAG" AutoCarPlay.apk \
+            --target "$GITHUB_SHA" \
+            --prerelease \
+            --title "AutoCarPlay APK ($GITHUB_REF_NAME)" \
+            --notes "Built from ${GITHUB_SHA::7}. Download AutoCarPlay.apk on your phone and install it. See the README for the Android Auto setup."
+          echo "APK: https://github.com/${GITHUB_REPOSITORY}/releases/download/${TAG}/AutoCarPlay.apk" >> "$GITHUB_STEP_SUMMARY"

@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">AutoCarPlay</string>
+    <string name="tagline">Watch videos on your car\'s Android Auto screen.</string>
+    <string name="share_label">Play on car screen</string>
+
+    <!-- Car screen -->
+    <string name="menu">Menu</string>
+    <string name="help">Help</string>
+    <string name="car_home_subtitle">Tap a tile, or use Menu. You can also send videos from the phone app.</string>
+    <string name="tile_videos">Phone videos</string>
+    <string name="tile_youtube">YouTube</string>
+    <string name="tile_links">Saved links</string>
+    <string name="tile_mirror">Mirror phone</string>
+    <string name="menu_phone_videos">Phone videos</string>
+    <string name="menu_phone_videos_text">Videos stored on this phone</string>
+    <string name="menu_links">Saved links</string>
+    <string name="menu_links_text">Links added or shared on the phone</string>
+    <string name="menu_youtube">YouTube</string>
+    <string name="menu_youtube_text">Open YouTube on this screen</string>
+    <string name="menu_search_youtube">Search YouTube</string>
+    <string name="menu_search_youtube_text">Type with the car keyboard (when parked)</string>
+    <string name="menu_website">Open a website</string>
+    <string name="menu_website_text">Type an address or search the web</string>
+    <string name="menu_mirror">Mirror phone screen</string>
+    <string name="menu_mirror_text">Show any app from your phone</string>
+    <string name="car_help">Tap the picture to use it like a touch screen. Use Menu to pick phone videos, saved links, YouTube or screen mirroring. On the phone app you can paste links or share videos from YouTube to AutoCarPlay. For your safety, only watch while parked.</string>
+    <string name="videos_permission_needed">Allow AutoCarPlay to read the videos on your phone. Check your phone after tapping the button.</string>
+    <string name="allow_on_phone">Allow on phone</string>
+    <string name="no_videos">No videos found on this phone</string>
+    <string name="more_videos">More videos…</string>
+    <string name="no_links">No saved links yet. Add links in the AutoCarPlay phone app, or share a link to it.</string>
+    <string name="search_youtube_hint">Search YouTube</string>
+    <string name="website_hint">Website or search</string>
+    <string name="web_no_back">No previous page</string>
+    <string name="video_error">Can\'t play this video (%1$s)</string>
+    <string name="mirror_title">Phone screen</string>
+    <string name="mirror_waiting">Waiting for the phone…\n\nOn your phone, tap “Start now” to share the screen.\nIf nothing appears, open AutoCarPlay on the phone and tap “Start mirroring”.</string>
+    <string name="mirror_check_phone">Check your phone to start mirroring</string>
+    <string name="touch_control_needed">To control the phone from this screen, turn on AutoCarPlay touch control in the phone app (Accessibility).</string>
+    <string name="touch_control_needed_short">Touch control is off (enable it in the phone app)</string>
+    <string name="mode_video">Video</string>
+    <string name="mode_web">Web</string>
+
+    <!-- Mirroring -->
+    <string name="mirror_notification_title">Mirroring to your car</string>
+    <string name="mirror_notification_text">Your phone screen is shown on the Android Auto screen.</string>
+    <string name="mirror_prompt_title">Start screen mirroring</string>
+    <string name="mirror_prompt_text">Tap to show your phone screen on the car display.</string>
+    <string name="mirror_failed">Screen mirroring could not start</string>
+    <string name="mirror_denied">Screen mirroring was not allowed</string>
+    <string name="mirror_started_hint">Mirroring started. Open the app you want to watch (for example YouTube) and turn the phone sideways.</string>
+    <string name="start_mirroring">Start mirroring</string>
+    <string name="stop_mirroring">Stop mirroring</string>
+    <string name="channel_mirror">Screen mirroring</string>
+    <string name="channel_prompt">Car requests</string>
+    <string name="touch_service_label">AutoCarPlay touch control</string>
+    <string name="touch_service_description">Lets you tap and swipe on the car screen to control the phone while it is mirrored. AutoCarPlay does not read or store anything on your screen.</string>
+
+    <!-- Phone app -->
+    <string name="status_car_open">Car screen: connected</string>
+    <string name="status_connected">Android Auto: connected</string>
+    <string name="status_not_connected">Android Auto: not connected</string>
+    <string name="status_showing">Showing on car: %1$s</string>
+    <string name="status_car_idle">AutoCarPlay is open on the car screen. Pick something to play below or on the car.</string>
+    <string name="status_pending">Your video will start as soon as you open AutoCarPlay on the car screen.</string>
+    <string name="status_open_on_car">Open AutoCarPlay from the Android Auto app launcher on the car screen.</string>
+    <string name="status_how_to_connect">Connect your phone to the car. Do the one-time setup below first.</string>
+    <string name="section_play">Play on car</string>
+    <string name="url_hint">Paste a link (YouTube, .mp4, .m3u8, any website)</string>
+    <string name="play_on_car">Play on car</string>
+    <string name="save">Save</string>
+    <string name="pick_video">Choose a video from this phone</string>
+    <string name="open_youtube">Open YouTube on car</string>
+    <string name="share_tip">Tip: in YouTube or Chrome, tap Share → AutoCarPlay to send a video straight to the car.</string>
+    <string name="section_mirror">Mirror phone screen</string>
+    <string name="mirror_explain">Shows your phone screen on the car display, so you can watch any app. Apps that block screen recording (Netflix, Prime Video and similar) show a black picture. Keep the phone unlocked and turn it sideways for a full-screen picture.</string>
+    <string name="touch_enable">Turn on touch control</string>
+    <string name="touch_settings">Touch control settings</string>
+    <string name="touch_on">Touch control is on: taps on the car screen control the phone.</string>
+    <string name="touch_off">Touch control is off. Without it, the mirrored screen can only be watched, not tapped.</string>
+    <string name="touch_enable_hint">Find “AutoCarPlay touch control” under Installed apps / Downloaded apps and turn it on.</string>
+    <string name="section_links">Saved links</string>
+    <string name="section_permissions">Permissions</string>
+    <string name="grant_videos">Allow access to phone videos</string>
+    <string name="grant_notifications">Allow notifications</string>
+    <string name="section_setup">One-time setup in Android Auto</string>
+    <string name="setup_steps">1. Open Android Auto settings (button below, or phone Settings → Connected devices → Connection preferences → Android Auto).\n2. Scroll to the bottom and tap “Version” 10 times, then allow developer settings.\n3. Tap ⋮ (top right) → Developer settings → turn on “Unknown sources”.\n4. Go back → Customize launcher → make sure AutoCarPlay is ticked.\n5. Connect the phone to your car and open AutoCarPlay on the car screen.\n\nTouch control on Android 13+: if Android says the setting is restricted, open phone Settings → Apps → AutoCarPlay → ⋮ → “Allow restricted settings”, then turn it on again.</string>
+    <string name="open_aa_settings">Open Android Auto settings</string>
+    <string name="android_auto_missing">Android Auto is not installed on this phone</string>
+    <string name="invalid_link">That does not look like a link</string>
+    <string name="link_saved">Link saved</string>
+    <string name="picked_video">Video</string>
+    <string name="sent_to_car">Playing on the car screen</string>
+    <string name="queued_for_car">Saved. It will play when you open AutoCarPlay on the car screen.</string>
+    <string name="share_no_link">No link found in what you shared</string>
+    <string name="play">Play</string>
+    <string name="delete">Delete</string>
+</resources>

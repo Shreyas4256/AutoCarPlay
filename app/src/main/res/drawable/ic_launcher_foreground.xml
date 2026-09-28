@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <!-- Car display -->
+    <path
+        android:fillColor="#FFFFFFFF"
+        android:pathData="M32,36h44a6,6 0,0 1,6 6v24a6,6 0,0 1,-6 6H32a6,6 0,0 1,-6 -6V42a6,6 0,0 1,6 -6z" />
+    <!-- Play button -->
+    <path
+        android:fillColor="#FF1565C0"
+        android:pathData="M48,45v18l15,-9z" />
+</vector>

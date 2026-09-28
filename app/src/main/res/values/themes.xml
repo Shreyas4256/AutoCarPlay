@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="brand">#1565C0</color>
+    <color name="brand_dark">#0D2B55</color>
+    <color name="launcher_background">#1565C0</color>
+
+    <style name="Theme.AutoCarPlay" parent="Theme.Material3.DayNight.NoActionBar">
+        <item name="colorPrimary">@color/brand</item>
+    </style>
+
+    <!-- Invisible helper activities (share target, screen-capture prompt). -->
+    <style name="Theme.AutoCarPlay.Transparent" parent="Theme.Material3.DayNight.NoActionBar">
+        <item name="android:windowIsTranslucent">true</item>
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:backgroundDimEnabled">false</item>
+        <item name="android:windowAnimationStyle">@null</item>
+    </style>
+
+    <!-- What is drawn on the car screen. -->
+    <style name="Theme.AutoCarPlay.Car" parent="android:Theme.DeviceDefault.NoActionBar.Fullscreen">
+        <item name="android:windowBackground">@android:color/black</item>
+        <item name="android:colorBackground">@android:color/black</item>
+        <item name="android:windowNoTitle">true</item>
+    </style>
+</resources>

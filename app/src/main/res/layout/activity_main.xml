@@ -1,0 +1,202 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/scroll"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:clipToPadding="false">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/app_name"
+            android:textAppearance="?attr/textAppearanceHeadlineMedium" />
+
+        <TextView
+            style="@style/PhoneBody"
+            android:layout_marginBottom="16dp"
+            android:text="@string/tagline" />
+
+        <!-- Status -->
+        <com.google.android.material.card.MaterialCardView style="@style/PhoneCard">
+
+            <LinearLayout style="@style/PhoneCardBody">
+
+                <TextView
+                    android:id="@+id/status_title"
+                    style="@style/PhoneSectionTitle"
+                    android:layout_marginBottom="4dp" />
+
+                <TextView
+                    android:id="@+id/status_text"
+                    style="@style/PhoneBody" />
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- Play on car -->
+        <com.google.android.material.card.MaterialCardView style="@style/PhoneCard">
+
+            <LinearLayout style="@style/PhoneCardBody">
+
+                <TextView
+                    style="@style/PhoneSectionTitle"
+                    android:text="@string/section_play" />
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/url_layout"
+                    style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="@string/url_hint">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/url_input"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:imeOptions="actionGo"
+                        android:inputType="textUri"
+                        android:maxLines="1" />
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/play_url"
+                        style="@style/PhoneButton"
+                        android:layout_width="0dp"
+                        android:layout_weight="1"
+                        android:text="@string/play_on_car"
+                        app:icon="@drawable/ic_play" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/save_url"
+                        style="@style/PhoneButton.Outlined"
+                        android:layout_width="0dp"
+                        android:layout_marginStart="8dp"
+                        android:layout_weight="1"
+                        android:text="@string/save" />
+                </LinearLayout>
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/pick_video"
+                    style="@style/PhoneButton.Outlined"
+                    android:text="@string/pick_video"
+                    app:icon="@drawable/ic_video" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/open_youtube"
+                    style="@style/PhoneButton.Outlined"
+                    android:text="@string/open_youtube"
+                    app:icon="@drawable/ic_youtube" />
+
+                <TextView
+                    style="@style/PhoneBody"
+                    android:layout_marginTop="8dp"
+                    android:text="@string/share_tip"
+                    android:textAppearance="?attr/textAppearanceBodySmall" />
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- Mirroring -->
+        <com.google.android.material.card.MaterialCardView style="@style/PhoneCard">
+
+            <LinearLayout style="@style/PhoneCardBody">
+
+                <TextView
+                    style="@style/PhoneSectionTitle"
+                    android:text="@string/section_mirror" />
+
+                <TextView
+                    style="@style/PhoneBody"
+                    android:text="@string/mirror_explain" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/mirror_button"
+                    style="@style/PhoneButton"
+                    android:text="@string/start_mirroring"
+                    app:icon="@drawable/ic_mirror" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/touch_button"
+                    style="@style/PhoneButton.Outlined"
+                    android:text="@string/touch_enable" />
+
+                <TextView
+                    android:id="@+id/touch_status"
+                    style="@style/PhoneBody"
+                    android:layout_marginTop="8dp"
+                    android:textAppearance="?attr/textAppearanceBodySmall" />
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- Saved links -->
+        <com.google.android.material.card.MaterialCardView style="@style/PhoneCard">
+
+            <LinearLayout style="@style/PhoneCardBody">
+
+                <TextView
+                    style="@style/PhoneSectionTitle"
+                    android:text="@string/section_links" />
+
+                <LinearLayout
+                    android:id="@+id/links_list"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical" />
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- Permissions -->
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/permissions_card"
+            style="@style/PhoneCard">
+
+            <LinearLayout style="@style/PhoneCardBody">
+
+                <TextView
+                    style="@style/PhoneSectionTitle"
+                    android:text="@string/section_permissions" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/grant_videos"
+                    style="@style/PhoneButton.Outlined"
+                    android:text="@string/grant_videos" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/grant_notifications"
+                    style="@style/PhoneButton.Outlined"
+                    android:text="@string/grant_notifications" />
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- Setup -->
+        <com.google.android.material.card.MaterialCardView style="@style/PhoneCard">
+
+            <LinearLayout style="@style/PhoneCardBody">
+
+                <TextView
+                    style="@style/PhoneSectionTitle"
+                    android:text="@string/section_setup" />
+
+                <TextView
+                    style="@style/PhoneBody"
+                    android:lineSpacingMultiplier="1.2"
+                    android:text="@string/setup_steps" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/open_aa_settings"
+                    style="@style/PhoneButton.Outlined"
+                    android:text="@string/open_aa_settings" />
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+    </LinearLayout>
+</ScrollView>
