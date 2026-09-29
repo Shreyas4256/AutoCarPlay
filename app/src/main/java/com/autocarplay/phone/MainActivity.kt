@@ -34,6 +34,7 @@ import com.autocarplay.core.Sources
 import com.autocarplay.mirror.MirrorManager
 import com.autocarplay.mirror.MirrorPermissionActivity
 import com.autocarplay.mirror.TouchControlService
+import com.autocarplay.obd.ObdAdapters
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
 
@@ -52,6 +53,8 @@ class MainActivity : AppCompatActivity() {
     private lateinit var permissionsCard: View
     private lateinit var grantVideos: Button
     private lateinit var grantNotifications: Button
+    private lateinit var grantBluetooth: Button
+    private lateinit var bluetoothStatus: TextView
 
     private var carConnected = false
     private val hubListener: () -> Unit = { updateUi() }
@@ -87,6 +90,8 @@ class MainActivity : AppCompatActivity() {
         permissionsCard = findViewById(R.id.permissions_card)
         grantVideos = findViewById(R.id.grant_videos)
         grantNotifications = findViewById(R.id.grant_notifications)
+        grantBluetooth = findViewById(R.id.grant_bluetooth)
+        bluetoothStatus = findViewById(R.id.bluetooth_status)
 
         findViewById<View>(R.id.play_url).setOnClickListener { submitUrl(play = true) }
         findViewById<View>(R.id.save_url).setOnClickListener { submitUrl(play = false) }
@@ -117,6 +122,9 @@ class MainActivity : AppCompatActivity() {
         grantVideos.setOnClickListener { requestPermission.launch(PhoneVideos.permission) }
         grantNotifications.setOnClickListener {
             if (Build.VERSION.SDK_INT >= 33) requestPermission.launch(Manifest.permission.POST_NOTIFICATIONS)
+        }
+        grantBluetooth.setOnClickListener {
+            ObdAdapters.bluetoothPermission?.let { requestPermission.launch(it) }
         }
         findViewById<View>(R.id.open_aa_settings).setOnClickListener { openAndroidAutoSettings() }
         findViewById<TextView>(R.id.compat_note).text = getString(
@@ -210,6 +218,10 @@ class MainActivity : AppCompatActivity() {
         grantVideos.visibility = if (needsVideos) View.VISIBLE else View.GONE
         grantNotifications.visibility = if (needsNotifications) View.VISIBLE else View.GONE
         permissionsCard.visibility = if (needsVideos || needsNotifications) View.VISIBLE else View.GONE
+
+        val bluetoothAllowed = ObdAdapters.hasBluetoothAccess(this)
+        grantBluetooth.visibility = if (bluetoothAllowed) View.GONE else View.VISIBLE
+        bluetoothStatus.visibility = if (bluetoothAllowed) View.VISIBLE else View.GONE
     }
 
     private fun renderLinks() {
@@ -256,6 +268,7 @@ class MainActivity : AppCompatActivity() {
         CarMode.VIDEO -> R.string.mode_video
         CarMode.WEB -> R.string.mode_web
         CarMode.MIRROR -> R.string.mirror_title
+        CarMode.DASHBOARD -> R.string.dashboard_title
     }
 
     private fun toast(message: Int) = Toast.makeText(this, message, Toast.LENGTH_LONG).show()

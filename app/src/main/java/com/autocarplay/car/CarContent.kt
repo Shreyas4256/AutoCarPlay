@@ -32,11 +32,12 @@ import androidx.media3.ui.PlayerView
 import com.autocarplay.R
 import com.autocarplay.core.CarMode
 import com.autocarplay.mirror.MirrorManager
+import com.autocarplay.obd.Gauge
 import kotlin.math.hypot
 
 /**
  * The views shown on the car screen (layout `car_presentation`): home tiles, video player,
- * web browser, mirrored phone screen and a simple list panel.
+ * web browser, mirrored phone screen, OBD-II dashboard and a simple list panel.
  *
  * It is hosted either by [CarPresentation] on the Android Auto map surface, where taps and
  * drags arrive as coordinates and are replayed here ([injectTap], [injectScroll]), or directly
@@ -58,9 +59,13 @@ class CarContent(
 
         /** A drag on the mirrored phone screen, in 0..1 coordinates of the phone screen. */
         fun onMirrorSwipe(fromX: Float, fromY: Float, toX: Float, toY: Float, durationMs: Long)
+
+        fun onDashboardButton(button: DashboardButton)
     }
 
-    enum class HomeTile { VIDEOS, YOUTUBE, LINKS, MIRROR }
+    enum class HomeTile { VIDEOS, YOUTUBE, LINKS, MIRROR, DASHBOARD }
+
+    enum class DashboardButton { FAULT_CODES, ADAPTER }
 
     /** On-screen buttons, shown only when the content runs as a car activity. */
     enum class Control { BACK, CLOSE }
@@ -83,6 +88,9 @@ class CarContent(
     private val mirrorFrame: AspectRatioFrameLayout = root.findViewById(R.id.mirror_frame)
     private val mirrorTexture: TextureView = root.findViewById(R.id.mirror_texture)
     private val mirrorHint: TextView = root.findViewById(R.id.mirror_hint)
+    private val dashboard: View = root.findViewById(R.id.dashboard)
+    private val dashboardStatus: TextView = root.findViewById(R.id.dashboard_status)
+    private val gaugeValues = HashMap<Gauge, TextView>()
     private val listPanel: View = root.findViewById(R.id.list_panel)
     private val listTitle: TextView = root.findViewById(R.id.list_title)
     private val listScroll: ScrollView = root.findViewById(R.id.list_scroll)
@@ -114,6 +122,13 @@ class CarContent(
         root.findViewById<View>(R.id.tile_youtube).setOnClickListener { callbacks.onHomeTile(HomeTile.YOUTUBE) }
         root.findViewById<View>(R.id.tile_links).setOnClickListener { callbacks.onHomeTile(HomeTile.LINKS) }
         root.findViewById<View>(R.id.tile_mirror).setOnClickListener { callbacks.onHomeTile(HomeTile.MIRROR) }
+        root.findViewById<View>(R.id.tile_dashboard).setOnClickListener { callbacks.onHomeTile(HomeTile.DASHBOARD) }
+        root.findViewById<View>(R.id.dashboard_codes).setOnClickListener {
+            callbacks.onDashboardButton(DashboardButton.FAULT_CODES)
+        }
+        root.findViewById<View>(R.id.dashboard_adapter).setOnClickListener {
+            callbacks.onDashboardButton(DashboardButton.ADAPTER)
+        }
         root.findViewById<View>(R.id.list_back).setOnClickListener { hideList() }
         controlBack.setOnClickListener { callbacks.onControl(Control.BACK) }
         root.findViewById<View>(R.id.control_close).setOnClickListener { callbacks.onControl(Control.CLOSE) }
@@ -147,6 +162,7 @@ class CarContent(
             override fun onSurfaceTextureUpdated(texture: SurfaceTexture) = Unit
         }
         if (directTouch) enableDirectMirrorTouch()
+        createGauges()
         applyMode()
     }
 
@@ -171,6 +187,21 @@ class CarContent(
     fun showMirror() {
         switchTo(CarMode.MIRROR)
         updateMirror()
+    }
+
+    fun showDashboard(status: String, values: Map<Gauge, Double?>) {
+        switchTo(CarMode.DASHBOARD)
+        updateDashboard(status, values)
+    }
+
+    /** Shows the connection status and every gauge ("–" for values not read yet). */
+    fun updateDashboard(status: String, values: Map<Gauge, Double?>) {
+        dashboardStatus.text = status
+        Gauge.entries.forEach { setGauge(it, values[it]) }
+    }
+
+    fun setGauge(gauge: Gauge, value: Double?) {
+        gaugeValues[gauge]?.text = gauge.format(value)
     }
 
     /** Refreshes the mirror picture's aspect ratio and the "waiting for phone" hint. */
@@ -378,7 +409,36 @@ class CarContent(
         if (mode != CarMode.VIDEO) videoTitle.visibility = View.GONE
         webContainer.visibility = visible(mode == CarMode.WEB)
         mirrorContainer.visibility = visible(mode == CarMode.MIRROR)
+        dashboard.visibility = visible(mode == CarMode.DASHBOARD)
         updateControls()
+    }
+
+    /** Two rows of gauges on the dashboard, in [Gauge] order. */
+    private fun createGauges() {
+        val rows = listOf<LinearLayout>(root.findViewById(R.id.gauge_row_1), root.findViewById(R.id.gauge_row_2))
+        val inflater = LayoutInflater.from(context)
+        val perRow = (Gauge.entries.size + 1) / 2
+        Gauge.entries.forEachIndexed { i, gauge ->
+            val row = rows[i / perRow]
+            val view = inflater.inflate(R.layout.car_gauge, row, false)
+            view.findViewById<TextView>(R.id.gauge_label).setText(gaugeLabel(gauge))
+            view.findViewById<TextView>(R.id.gauge_unit).text = gauge.unit
+            val value = view.findViewById<TextView>(R.id.gauge_value)
+            value.text = gauge.format(null)
+            gaugeValues[gauge] = value
+            row.addView(view)
+        }
+    }
+
+    private fun gaugeLabel(gauge: Gauge): Int = when (gauge) {
+        Gauge.RPM -> R.string.gauge_rpm
+        Gauge.SPEED -> R.string.gauge_speed
+        Gauge.ENGINE_LOAD -> R.string.gauge_engine_load
+        Gauge.THROTTLE -> R.string.gauge_throttle
+        Gauge.COOLANT -> R.string.gauge_coolant
+        Gauge.INTAKE_AIR -> R.string.gauge_intake_air
+        Gauge.FUEL_LEVEL -> R.string.gauge_fuel_level
+        Gauge.BATTERY -> R.string.gauge_battery
     }
 
     private fun updateControls() {

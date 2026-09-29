@@ -15,6 +15,15 @@
         android:name="android.permission.READ_EXTERNAL_STORAGE"
         android:maxSdkVersion="32" />
 
+    <!-- Car dashboard: talking to a Bluetooth ELM327 OBD-II adapter paired with the phone. -->
+    <uses-permission
+        android:name="android.permission.BLUETOOTH"
+        android:maxSdkVersion="30" />
+    <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
+    <uses-feature
+        android:name="android.hardware.bluetooth"
+        android:required="false" />
+
     <!--
         Android Auto only hands a raw drawing surface to navigation apps, so the app registers
         in the NAVIGATION category and draws the video onto that surface.

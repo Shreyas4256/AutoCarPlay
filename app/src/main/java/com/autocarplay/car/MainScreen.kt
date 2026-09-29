@@ -80,6 +80,7 @@ class MainScreen(
                 map.addAction(ctx.carAction(R.drawable.ic_scroll_up) { controller.mirrorScroll(false) })
                 map.addAction(ctx.carAction(R.drawable.ic_scroll_down) { controller.mirrorScroll(true) })
             }
+            CarMode.DASHBOARD -> strip.addAction(ctx.carAction(R.drawable.ic_close) { controller.goHome() })
         }
 
         return NavigationTemplate.Builder()

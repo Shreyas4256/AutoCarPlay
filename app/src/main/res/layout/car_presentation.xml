@@ -90,6 +90,19 @@
                     style="@style/CarTileLabel"
                     android:text="@string/tile_mirror" />
             </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/tile_dashboard"
+                style="@style/CarTile">
+
+                <ImageView
+                    style="@style/CarTileIcon"
+                    android:src="@drawable/ic_dashboard" />
+
+                <TextView
+                    style="@style/CarTileLabel"
+                    android:text="@string/tile_dashboard" />
+            </LinearLayout>
         </LinearLayout>
     </LinearLayout>
 
@@ -156,6 +169,72 @@
             android:textColor="@android:color/white"
             android:textSize="18sp" />
     </FrameLayout>
+
+    <!-- OBD-II car dashboard; the gauges are added by CarContent. -->
+    <LinearLayout
+        android:id="@+id/dashboard"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@drawable/car_home_bg"
+        android:orientation="vertical"
+        android:padding="16dp"
+        android:visibility="gone">
+
+        <!-- The end margin leaves room for the back / close buttons. -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="136dp"
+            android:maxLines="1"
+            android:text="@string/dashboard_title"
+            android:textColor="@android:color/white"
+            android:textSize="22sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/dashboard_status"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="136dp"
+            android:layout_marginBottom="12dp"
+            android:ellipsize="end"
+            android:maxLines="2"
+            android:textColor="#B3FFFFFF"
+            android:textSize="15sp" />
+
+        <LinearLayout
+            android:id="@+id/gauge_row_1"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:orientation="horizontal" />
+
+        <LinearLayout
+            android:id="@+id/gauge_row_2"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_marginTop="12dp"
+            android:layout_weight="1"
+            android:orientation="horizontal" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:orientation="horizontal"
+            android:paddingHorizontal="6dp">
+
+            <TextView
+                android:id="@+id/dashboard_codes"
+                style="@style/CarTextButton"
+                android:text="@string/dashboard_fault_codes" />
+
+            <TextView
+                android:id="@+id/dashboard_adapter"
+                style="@style/CarTextButton"
+                android:text="@string/dashboard_change_adapter" />
+        </LinearLayout>
+    </LinearLayout>
 
     <!-- Lists (phone videos, saved links) when there are no Android Auto list templates. -->
     <LinearLayout
