@@ -15,6 +15,7 @@ touchscreen, but it works on any Android Auto head unit).
 | **Links** | Play any `.mp4` / `.m3u8` (HLS) / `.mpd` (DASH) link, or open any website. |
 | **Share to car** | In YouTube/Chrome tap **Share → AutoCarPlay**, and it plays on the car. |
 | **Mirror phone screen** | Shows your whole phone screen in the car, so any app works. With *touch control* on, taps on the car screen control the phone. |
+| **Car dashboard (OBD-II)** | Live engine speed, speed, load, throttle, coolant and intake temperature, fuel level and battery voltage, plus stored fault codes, from a cheap ELM327 adapter. |
 
 Audio plays through the car speakers like any Android Auto audio.
 
@@ -53,6 +54,7 @@ Main code:
 * `car/CarScreenActivity.kt`: route 1, the parked car activity.
 * `car/CarSurfaceHost.kt`, `CarPresentation.kt`: route 2, drawing onto the Car App Library surface.
 * `car/MainScreen.kt`, `MenuScreen.kt`, `LibraryScreens.kt`: route 2's Android Auto templates (buttons, lists, keyboard).
+* `obd/`: the car dashboard: ELM327 protocol parsing (`Elm327.kt`), the Bluetooth / Wi-Fi link and the polling session.
 * `mirror/`: screen capture (`MediaProjection`), the foreground service, and touch control (`AccessibilityService`).
 * `phone/`: the phone app (remote control, setup guide, share target).
 
@@ -93,6 +95,19 @@ In the AutoCarPlay phone app, also allow **video access** and **notifications**.
 Phone **Settings → Accessibility → Installed apps → AutoCarPlay touch control → On**.
 On Android 13+, if the switch is greyed out ("restricted setting"): **Settings → Apps →
 AutoCarPlay → ⋮ → Allow restricted settings**, then try again.
+
+### Optional: car dashboard (OBD-II)
+
+1. Buy an **ELM327 OBD-II adapter**: Bluetooth (classic, not "BLE only") or Wi-Fi. Plug it into
+   the car's OBD-II port, usually under the dashboard near the steering wheel.
+2. **Bluetooth:** pair it in the phone's Bluetooth settings (PIN usually `1234` or `0000`), then
+   tap **Allow Bluetooth** in the AutoCarPlay phone app. **Wi-Fi:** join the adapter's Wi-Fi
+   network on the phone (the app uses the usual address `192.168.0.10:35000`).
+3. Turn the ignition on, then tap **Car dashboard** on the car screen and pick the adapter. The
+   choice is remembered; **OBD adapter** changes it and **Fault codes** reads stored engine codes.
+
+Like everything in the car activity, the dashboard only shows while parked. Readings are read-only:
+the app never clears codes or changes anything in the car.
 
 ## Using it
 

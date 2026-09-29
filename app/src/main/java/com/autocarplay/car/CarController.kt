@@ -30,14 +30,18 @@ import com.autocarplay.mirror.MirrorManager
 import com.autocarplay.mirror.MirrorPermissionActivity
 import com.autocarplay.mirror.MirrorPrompt
 import com.autocarplay.mirror.TouchControlService
+import com.autocarplay.obd.Gauge
+import com.autocarplay.obd.ObdAdapter
+import com.autocarplay.obd.ObdAdapters
+import com.autocarplay.obd.ObdSession
 import java.util.concurrent.Executors
 
 /**
- * What the car screen shows and plays: the video player, the web page, the phone mirror and
- * the home screen. The views themselves live in a [CarContent], which is attached while the
+ * What the car screen shows and plays: the video player, the web page, the phone mirror, the
+ * OBD-II dashboard and the home screen. The views themselves live in a [CarContent], which is attached while the
  * car screen is visible (it may come and go while playback continues).
  */
-class CarController(private val context: Context) : CarScreen, CarContent.Callbacks {
+class CarController(private val context: Context) : CarScreen, CarContent.Callbacks, ObdSession.Listener {
 
     /** Lets the home-screen tiles open Android Auto template screens (lists). */
     interface Navigator {
@@ -66,6 +70,13 @@ class CarController(private val context: Context) : CarScreen, CarContent.Callba
     private var webUrl: String? = null
     private var touchHintShown = false
 
+    // Car dashboard: the adapter session and the latest readings, kept while the views come and go.
+    private var obdSession: ObdSession? = null
+    private var obdStatus = ""
+    private var obdConnected = false
+    private val obdValues = HashMap<Gauge, Double?>()
+    private var codesPending = false
+
     private val hubListener: () -> Unit = { content?.updateMirror() }
 
     init {
@@ -85,6 +96,7 @@ class CarController(private val context: Context) : CarScreen, CarContent.Callba
             }
             CarMode.WEB -> newContent.showWeb(webUrl ?: Sources.YOUTUBE_HOME)
             CarMode.MIRROR -> newContent.showMirror()
+            CarMode.DASHBOARD -> newContent.showDashboard(obdStatus, obdValues)
         }
     }
 
@@ -102,6 +114,7 @@ class CarController(private val context: Context) : CarScreen, CarContent.Callba
     }
 
     override fun startMirror() {
+        leaveDashboard()
         pausePlayer()
         mode = CarMode.MIRROR
         title = context.getString(R.string.mirror_title)
@@ -121,6 +134,7 @@ class CarController(private val context: Context) : CarScreen, CarContent.Callba
 
     fun goHome() {
         leaveMirror()
+        leaveDashboard()
         pausePlayer()
         mode = CarMode.HOME
         title = null
@@ -219,6 +233,7 @@ class CarController(private val context: Context) : CarScreen, CarContent.Callba
         CarHub.detach(this)
         MirrorManager.onGeometryChanged = null
         MirrorManager.stop()
+        leaveDashboard()
         content = null
         player?.release()
         player = null
@@ -234,6 +249,14 @@ class CarController(private val context: Context) : CarScreen, CarContent.Callba
             CarContent.HomeTile.YOUTUBE -> openWeb(Sources.YOUTUBE_HOME, "YouTube")
             CarContent.HomeTile.LINKS -> navigator?.openLinks() ?: showLinkList()
             CarContent.HomeTile.MIRROR -> startMirror()
+            CarContent.HomeTile.DASHBOARD -> openDashboard()
+        }
+    }
+
+    override fun onDashboardButton(button: CarContent.DashboardButton) {
+        when (button) {
+            CarContent.DashboardButton.FAULT_CODES -> readTroubleCodes()
+            CarContent.DashboardButton.ADAPTER -> showAdapterList()
         }
     }
 
@@ -259,6 +282,130 @@ class CarController(private val context: Context) : CarScreen, CarContent.Callba
         val w = MirrorManager.phoneWidth
         val h = MirrorManager.phoneHeight
         TouchControlService.instance?.swipe(fromX * w, fromY * h, toX * w, toY * h, durationMs)
+    }
+
+    // endregion
+
+    // region ObdSession.Listener
+
+    override fun onObdStatus(status: String, connected: Boolean) {
+        obdStatus = status
+        obdConnected = connected
+        if (mode == CarMode.DASHBOARD) content?.updateDashboard(status, obdValues)
+    }
+
+    override fun onObdReading(gauge: Gauge, value: Double?) {
+        obdValues[gauge] = value
+        if (mode == CarMode.DASHBOARD) content?.setGauge(gauge, value)
+    }
+
+    override fun onTroubleCodes(codes: List<String>?, error: String?) {
+        if (!codesPending) return
+        codesPending = false
+        val target = content ?: return
+        if (mode != CarMode.DASHBOARD || !target.isListShown) return
+        val listTitle = context.getString(R.string.obd_codes_title)
+        if (codes == null) {
+            target.showList(listTitle, emptyList(), context.getString(R.string.obd_codes_failed, error.orEmpty()))
+            return
+        }
+        val rows = codes.map { code ->
+            CarContent.ListRow(code, describeTroubleCode(code), R.drawable.ic_dashboard, null) {}
+        }
+        target.showList(listTitle, rows, context.getString(R.string.obd_no_codes))
+    }
+
+    // endregion
+
+    // region Car dashboard (OBD-II)
+
+    private fun openDashboard() {
+        leaveMirror()
+        pausePlayer()
+        mode = CarMode.DASHBOARD
+        title = context.getString(R.string.dashboard_title)
+        content?.showDashboard(obdStatus, obdValues)
+        CarHub.notifyChanged()
+        val adapter = ObdAdapters.chosen(context)
+        if (adapter == null) showAdapterList() else connectObd(adapter)
+    }
+
+    private fun connectObd(adapter: ObdAdapter) {
+        obdSession?.stop()
+        obdSession = null
+        obdValues.clear()
+        if (adapter is ObdAdapter.Bluetooth && !ObdAdapters.hasBluetoothAccess(context)) {
+            onObdStatus(context.getString(R.string.obd_bluetooth_permission), connected = false)
+            return
+        }
+        obdSession = ObdSession(context, adapter, this).also { it.start() }
+    }
+
+    /** Lists the paired Bluetooth devices and the Wi-Fi adapter to connect to. */
+    private fun showAdapterList() {
+        val target = content ?: return
+        if (!ObdAdapters.hasBluetoothAccess(context)) {
+            target.showMessage(context.getString(R.string.obd_bluetooth_permission), 6000)
+        }
+        val bluetoothRows = ObdAdapters.pairedDevices(context).map { device ->
+            adapterRow(device, device.name, context.getString(R.string.obd_bluetooth_adapter_text))
+        }
+        val wifi = ObdAdapter.WiFi()
+        val wifiRow = adapterRow(
+            wifi,
+            context.getString(R.string.obd_wifi_adapter),
+            context.getString(R.string.obd_wifi_adapter_text, "${wifi.host}:${wifi.port}"),
+        )
+        target.showList(
+            context.getString(R.string.obd_pick_adapter),
+            bluetoothRows + wifiRow,
+            context.getString(R.string.obd_no_adapters),
+        )
+    }
+
+    private fun adapterRow(adapter: ObdAdapter, rowTitle: String, subtitle: String) = CarContent.ListRow(
+        title = rowTitle,
+        subtitle = subtitle,
+        icon = R.drawable.ic_dashboard,
+        thumbnail = null,
+    ) {
+        ObdAdapters.choose(context, adapter)
+        connectObd(adapter)
+    }
+
+    private fun readTroubleCodes() {
+        val session = obdSession
+        val target = content ?: return
+        if (session == null || !obdConnected) {
+            toast(R.string.obd_not_connected)
+            return
+        }
+        codesPending = true
+        target.showList(context.getString(R.string.obd_codes_title), null, "")
+        session.readTroubleCodes()
+    }
+
+    /** "P0301" → "Engine / transmission · standard code". */
+    private fun describeTroubleCode(code: String): String {
+        val system = context.getString(
+            when (code.first()) {
+                'C' -> R.string.obd_code_chassis
+                'B' -> R.string.obd_code_body
+                'U' -> R.string.obd_code_network
+                else -> R.string.obd_code_powertrain
+            },
+        )
+        val generic = code.getOrNull(1) == '0' || (code.first() == 'P' && code.getOrNull(1) == '2')
+        return context.getString(if (generic) R.string.obd_code_generic else R.string.obd_code_maker, system)
+    }
+
+    private fun leaveDashboard() {
+        obdSession?.stop()
+        obdSession = null
+        obdStatus = ""
+        obdConnected = false
+        obdValues.clear()
+        codesPending = false
     }
 
     // endregion
@@ -311,6 +458,7 @@ class CarController(private val context: Context) : CarScreen, CarContent.Callba
 
     private fun playVideo(request: PlayRequest) {
         leaveMirror()
+        leaveDashboard()
         val p = player ?: createPlayer().also { player = it }
         val item = MediaItem.Builder()
             .setUri(request.uri)
@@ -327,6 +475,7 @@ class CarController(private val context: Context) : CarScreen, CarContent.Callba
 
     private fun openWeb(url: String, pageTitle: String) {
         leaveMirror()
+        leaveDashboard()
         pausePlayer()
         mode = CarMode.WEB
         title = pageTitle

@@ -4,7 +4,7 @@ import android.os.Handler
 import android.os.Looper
 
 /** What the car screen is currently showing. */
-enum class CarMode { HOME, VIDEO, WEB, MIRROR }
+enum class CarMode { HOME, VIDEO, WEB, MIRROR, DASHBOARD }
 
 /** Implemented by the car-side screen controller while Android Auto shows this app. */
 interface CarScreen {

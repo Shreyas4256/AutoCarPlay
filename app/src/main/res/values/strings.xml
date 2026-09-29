@@ -16,6 +16,7 @@
     <string name="tile_youtube">YouTube</string>
     <string name="tile_links">Saved links</string>
     <string name="tile_mirror">Mirror phone</string>
+    <string name="tile_dashboard">Car dashboard</string>
     <string name="menu_phone_videos">Phone videos</string>
     <string name="menu_phone_videos_text">Videos stored on this phone</string>
     <string name="menu_links">Saved links</string>
@@ -45,6 +46,41 @@
     <string name="touch_control_needed_short">Touch control is off (enable it in the phone app)</string>
     <string name="mode_video">Video</string>
     <string name="mode_web">Web</string>
+
+    <!-- Car dashboard (OBD-II) -->
+    <string name="dashboard_title">Car dashboard</string>
+    <string name="dashboard_fault_codes">Fault codes</string>
+    <string name="dashboard_change_adapter">OBD adapter</string>
+    <string name="gauge_rpm">Engine speed</string>
+    <string name="gauge_speed">Speed</string>
+    <string name="gauge_engine_load">Engine load</string>
+    <string name="gauge_throttle">Throttle</string>
+    <string name="gauge_coolant">Coolant</string>
+    <string name="gauge_intake_air">Intake air</string>
+    <string name="gauge_fuel_level">Fuel level</string>
+    <string name="gauge_battery">Battery</string>
+    <string name="obd_pick_adapter">Choose your OBD-II adapter</string>
+    <string name="obd_wifi_adapter">Wi-Fi OBD adapter</string>
+    <string name="obd_wifi_adapter_text">First join the adapter\'s Wi-Fi network on the phone (%1$s)</string>
+    <string name="obd_bluetooth_adapter_text">Paired Bluetooth device</string>
+    <string name="obd_no_adapters">No adapters found. Pair your OBD-II adapter in the phone\'s Bluetooth settings.</string>
+    <string name="obd_bluetooth_permission">Allow Bluetooth in the AutoCarPlay phone app to use a Bluetooth OBD adapter.</string>
+    <string name="obd_connecting">Connecting to %1$s…</string>
+    <string name="obd_initializing">Adapter connected, setting it up…</string>
+    <string name="obd_searching">Talking to the car… (the ignition must be on)</string>
+    <string name="obd_connected">Connected · %1$s</string>
+    <string name="obd_failed">Not connected: %1$s. Retrying…</string>
+    <string name="obd_no_car">the car is not answering (is the ignition on?)</string>
+    <string name="obd_not_connected">Not connected to the car yet</string>
+    <string name="obd_codes_title">Fault codes</string>
+    <string name="obd_no_codes">No fault codes stored. The engine light should be off.</string>
+    <string name="obd_codes_failed">Could not read fault codes (%1$s)</string>
+    <string name="obd_code_powertrain">Engine / transmission</string>
+    <string name="obd_code_chassis">Chassis (brakes, steering, suspension)</string>
+    <string name="obd_code_body">Body (airbags, lights, comfort)</string>
+    <string name="obd_code_network">Network / communication between modules</string>
+    <string name="obd_code_generic">%1$s · standard code</string>
+    <string name="obd_code_maker">%1$s · manufacturer-specific code</string>
 
     <!-- Mirroring -->
     <string name="mirror_notification_title">Mirroring to your car</string>
@@ -88,6 +124,10 @@
     <string name="section_permissions">Permissions</string>
     <string name="grant_videos">Allow access to phone videos</string>
     <string name="grant_notifications">Allow notifications</string>
+    <string name="section_dashboard">Car dashboard (OBD-II)</string>
+    <string name="dashboard_explain">Plug an ELM327 OBD-II adapter (Bluetooth or Wi-Fi) into the car\'s diagnostic port, under the dashboard near the steering wheel. For Bluetooth, pair it in the phone\'s Bluetooth settings first (the PIN is usually 1234 or 0000). Then open “Car dashboard” on the car screen to see engine speed, temperatures, battery voltage and fault codes while parked.</string>
+    <string name="grant_bluetooth">Allow Bluetooth</string>
+    <string name="bluetooth_granted">Bluetooth is allowed.</string>
     <string name="section_setup">One-time setup in Android Auto</string>
     <string name="setup_steps">1. Update Android Auto from the Play Store. Your phone needs Android 15 or newer (see the note above).\n2. Open Android Auto settings (button below, or phone Settings → Connected devices → Connection preferences → Android Auto).\n3. Scroll to the bottom and tap “Version” 10 times, then allow developer settings.\n4. Tap ⋮ (top right) → Developer settings → turn on “Unknown sources”.\n5. Go back → Customize launcher → make sure AutoCarPlay is ticked.\n6. Unplug and reconnect the phone to the car (or restart the car screen), then open AutoCarPlay from the Android Auto launcher while parked.\n\nAndroid shows AutoCarPlay as a game, because games are the only full-screen apps Android Auto allows when an app is not from the Play Store.\n\nTouch control on Android 13+: if Android says the setting is restricted, open phone Settings → Apps → AutoCarPlay → ⋮ → “Allow restricted settings”, then turn it on again.</string>
     <string name="open_aa_settings">Open Android Auto settings</string>

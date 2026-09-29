@@ -138,6 +138,34 @@
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
+        <!-- Car dashboard (OBD-II) -->
+        <com.google.android.material.card.MaterialCardView style="@style/PhoneCard">
+
+            <LinearLayout style="@style/PhoneCardBody">
+
+                <TextView
+                    style="@style/PhoneSectionTitle"
+                    android:text="@string/section_dashboard" />
+
+                <TextView
+                    style="@style/PhoneBody"
+                    android:text="@string/dashboard_explain" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/grant_bluetooth"
+                    style="@style/PhoneButton.Outlined"
+                    android:text="@string/grant_bluetooth"
+                    app:icon="@drawable/ic_dashboard" />
+
+                <TextView
+                    android:id="@+id/bluetooth_status"
+                    style="@style/PhoneBody"
+                    android:layout_marginTop="8dp"
+                    android:text="@string/bluetooth_granted"
+                    android:textAppearance="?attr/textAppearanceBodySmall" />
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
         <!-- Saved links -->
         <com.google.android.material.card.MaterialCardView style="@style/PhoneCard">
 
