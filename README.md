@@ -58,9 +58,11 @@ Main code:
 
 ## Install
 
-1. On your phone, download **AutoCarPlay.apk** from this repository's
-   [Releases](../../releases) page (every push builds a new APK with GitHub Actions; it's also
-   attached to each workflow run as an artifact).
+1. On your phone, download the latest APK:
+   **https://github.com/Shreyas4256/AutoCarPlay/releases/download/apk-main/AutoCarPlay.apk**
+   (every push to `main` rebuilds it with GitHub Actions; other branches publish to their own
+   `apk-<branch>` release on the [Releases](../../releases) page, and each workflow run also
+   keeps the APK as an artifact).
 2. Open it and allow installing from your browser/file manager.
 
 To build it yourself: `./gradlew assembleRelease` (needs JDK 17 and the Android SDK). The APK is in
