@@ -119,6 +119,10 @@ class MainActivity : AppCompatActivity() {
             if (Build.VERSION.SDK_INT >= 33) requestPermission.launch(Manifest.permission.POST_NOTIFICATIONS)
         }
         findViewById<View>(R.id.open_aa_settings).setOnClickListener { openAndroidAutoSettings() }
+        findViewById<TextView>(R.id.compat_note).text = getString(
+            if (Build.VERSION.SDK_INT >= 35) R.string.compat_ok else R.string.compat_old,
+            Build.VERSION.RELEASE,
+        )
 
         CarConnection(this).type.observe(this) { type ->
             carConnected = type == CarConnection.CONNECTION_TYPE_PROJECTION

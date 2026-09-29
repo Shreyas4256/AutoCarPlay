@@ -188,6 +188,12 @@
                     android:text="@string/section_setup" />
 
                 <TextView
+                    android:id="@+id/compat_note"
+                    style="@style/PhoneBody"
+                    android:layout_marginBottom="8dp"
+                    android:textStyle="bold" />
+
+                <TextView
                     style="@style/PhoneBody"
                     android:lineSpacingMultiplier="1.2"
                     android:text="@string/setup_steps" />

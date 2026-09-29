@@ -17,7 +17,7 @@ import com.autocarplay.core.Sources
 /** Main menu: every way to put something on the car screen. Six rows fit on every car. */
 class MenuScreen(
     carContext: CarContext,
-    private val display: CarDisplayController,
+    private val controller: CarController,
 ) : Screen(carContext) {
 
     @Suppress("DEPRECATION") // setTitle/setHeaderAction/setActionStrip work on every Android Auto version.
@@ -25,23 +25,23 @@ class MenuScreen(
         val ctx = carContext
         val items = ItemList.Builder()
             .addItem(row(R.drawable.ic_video, R.string.menu_phone_videos, R.string.menu_phone_videos_text) {
-                screenManager.push(PhoneVideosScreen(ctx, display))
+                screenManager.push(PhoneVideosScreen(ctx, controller))
             })
             .addItem(row(R.drawable.ic_link, R.string.menu_links, R.string.menu_links_text) {
-                screenManager.push(LinksScreen(ctx, display))
+                screenManager.push(LinksScreen(ctx, controller))
             })
             .addItem(row(R.drawable.ic_youtube, R.string.menu_youtube, R.string.menu_youtube_text) {
-                display.open(PlayRequest(SourceKind.WEB, Sources.YOUTUBE_HOME, "YouTube"))
+                controller.open(PlayRequest(SourceKind.WEB, Sources.YOUTUBE_HOME, "YouTube"))
                 screenManager.popToRoot()
             })
             .addItem(row(R.drawable.ic_search, R.string.menu_search_youtube, R.string.menu_search_youtube_text) {
-                screenManager.push(KeyboardScreen(ctx, display, searchYouTube = true))
+                screenManager.push(KeyboardScreen(ctx, controller, searchYouTube = true))
             })
             .addItem(row(R.drawable.ic_web, R.string.menu_website, R.string.menu_website_text) {
-                screenManager.push(KeyboardScreen(ctx, display, searchYouTube = false))
+                screenManager.push(KeyboardScreen(ctx, controller, searchYouTube = false))
             })
             .addItem(row(R.drawable.ic_mirror, R.string.menu_mirror, R.string.menu_mirror_text) {
-                display.startMirror()
+                controller.startMirror()
                 screenManager.popToRoot()
             })
             .build()

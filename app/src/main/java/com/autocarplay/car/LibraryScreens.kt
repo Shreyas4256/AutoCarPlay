@@ -30,7 +30,7 @@ private val mainThread = Handler(Looper.getMainLooper())
 /** Videos stored on the phone, newest first, a page at a time. */
 class PhoneVideosScreen(
     carContext: CarContext,
-    private val display: CarDisplayController,
+    private val controller: CarController,
     private val offset: Int = 0,
 ) : Screen(carContext) {
 
@@ -72,7 +72,7 @@ class PhoneVideosScreen(
             val row = Row.Builder()
                 .setTitle(video.title)
                 .setOnClickListener {
-                    display.open(PlayRequest(SourceKind.VIDEO, video.uri.toString(), video.title))
+                    controller.open(PlayRequest(SourceKind.VIDEO, video.uri.toString(), video.title))
                     screenManager.popToRoot()
                 }
             PhoneVideos.describe(video).takeIf { it.isNotBlank() }?.let { row.addText(it) }
@@ -86,7 +86,7 @@ class PhoneVideosScreen(
                     .setTitle(ctx.getString(R.string.more_videos))
                     .setImage(ctx.carIcon(R.drawable.ic_more))
                     .setOnClickListener {
-                        screenManager.push(PhoneVideosScreen(ctx, display, offset + loaded.size))
+                        screenManager.push(PhoneVideosScreen(ctx, controller, offset + loaded.size))
                     }
                     .build(),
             )
@@ -137,7 +137,7 @@ class PhoneVideosScreen(
 /** Links saved on the phone or shared to the app. */
 class LinksScreen(
     carContext: CarContext,
-    private val display: CarDisplayController,
+    private val controller: CarController,
 ) : Screen(carContext) {
 
     @Suppress("DEPRECATION")
@@ -153,7 +153,7 @@ class LinksScreen(
                     .addText(link.url)
                     .setImage(ctx.carIcon(if (kind == SourceKind.VIDEO) R.drawable.ic_video else R.drawable.ic_web))
                     .setOnClickListener {
-                        Sources.requestFor(link.url, link.title)?.let { display.open(it) }
+                        Sources.requestFor(link.url, link.title)?.let { controller.open(it) }
                         screenManager.popToRoot()
                     }
                     .build(),
@@ -170,7 +170,7 @@ class LinksScreen(
 /** Car keyboard: search YouTube, or type a website / search the web. */
 class KeyboardScreen(
     carContext: CarContext,
-    private val display: CarDisplayController,
+    private val controller: CarController,
     private val searchYouTube: Boolean,
 ) : Screen(carContext) {
 
@@ -199,7 +199,7 @@ class KeyboardScreen(
     private fun submit(text: String) {
         val request = Sources.requestForQuery(text, searchYouTube) ?: return
         LinkStore(carContext).addRecentQuery(text.trim())
-        display.open(request)
+        controller.open(request)
         screenManager.popToRoot()
     }
 }

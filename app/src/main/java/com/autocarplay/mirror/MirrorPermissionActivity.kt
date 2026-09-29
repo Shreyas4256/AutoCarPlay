@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.Intent
 import android.media.projection.MediaProjectionManager
 import android.os.Bundle
+import android.view.Display
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.result.contract.ActivityResultContracts
@@ -45,11 +46,15 @@ class MirrorPermissionActivity : ComponentActivity() {
         fun intent(context: Context): Intent =
             Intent(context, MirrorPermissionActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
 
-        /** Opens the consent prompt on the phone. Works from the car session too. */
+        /**
+         * Opens the consent prompt on the phone screen. Works from the car session and from
+         * the car activity (which runs on the car display, so the phone display is requested).
+         */
         fun launch(context: Context): Boolean {
             MirrorManager.consentPending = true
+            val options = ActivityOptions.makeBasic().setLaunchDisplayId(Display.DEFAULT_DISPLAY)
             return try {
-                context.startActivity(intent(context), ActivityOptions.makeBasic().toBundle())
+                context.startActivity(intent(context), options.toBundle())
                 true
             } catch (e: Exception) {
                 MirrorManager.consentPending = false

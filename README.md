@@ -22,30 +22,37 @@ Audio plays through the car speakers like any Android Auto audio.
 
 Android Auto doesn't let normal apps show video, and its official video support only covers
 some Android Automotive cars. A Nexon uses phone projection, so that support doesn't apply.
-The one opening Android Auto gives third-party apps is the **Android for Cars App Library**
-(`androidx.car.app`): apps in the **navigation** category get a raw drawing `Surface` on the car
-display (normally used for maps). AutoCarPlay uses that surface:
+AutoCarPlay has two ways onto the car screen. Both show the same content:
 
 ```
-Android Auto (car screen)
-   └─ NavigationTemplate  ── the car's buttons (Menu, play/pause, …)
-   └─ Surface ◄── VirtualDisplay ◄── Presentation (normal Android views)
-                                        ├─ Media3 ExoPlayer PlayerView  (phone videos, links, HLS/DASH)
-                                        ├─ WebView                     (YouTube / websites)
-                                        └─ TextureView ◄── MediaProjection (phone screen mirror)
+CarContent (normal Android views)
+   ├─ Media3 ExoPlayer PlayerView  (phone videos, links, HLS/DASH)
+   ├─ WebView                     (YouTube / websites)
+   └─ TextureView ◄── MediaProjection (phone screen mirror)
 ```
 
-* **Touch:** Android Auto reports taps and drags on the surface (`SurfaceCallback.onClick/onScroll`).
-  They're replayed as touch events on the views above. When mirroring, the optional
-  accessibility service replays them on the phone screen.
-* **Sideloading:** Google Play doesn't accept this kind of app, so it's installed as an APK, and
-  Android Auto needs *Unknown sources* turned on (steps below).
+1. **Car activity (for sideloaded installs).** `CarScreenActivity` is declared with the
+   `CAR_LAUNCHER` category, so Android Auto opens it full screen on the car display while the car
+   is parked. Android Auto only allows these "parked apps" in the **games** category, so the app is
+   marked `android:appCategory="game"`. Google's testing guide says Android Auto's *Unknown sources*
+   setting covers parked apps, so this works without the Play Store. It needs an **Android 15+
+   phone** and a recent Android Auto. Touches arrive as normal touch events.
+2. **Car App Library surface (for Play Store installs).** `VideoCarAppService` is a
+   `androidx.car.app` app in the **navigation** category, which gets a raw drawing `Surface` (meant
+   for maps). The content is drawn on it through a `VirtualDisplay` + `Presentation`, and the taps
+   and drags Android Auto reports are replayed as touch events. Android Auto **does not list Car
+   App Library apps that were sideloaded**, even with *Unknown sources* on. They must come from a
+   trusted source such as Google Play (a Play Console internal test works without review).
+
+When mirroring, the optional accessibility service replays car-screen taps on the phone screen.
 
 Main code:
 
-* `car/CarDisplayController.kt`: receives the car surface and manages the virtual display, the player and the modes.
-* `car/CarPresentation.kt`: what's drawn on the car screen, and the touch replay.
-* `car/MainScreen.kt`, `MenuScreen.kt`, `LibraryScreens.kt`: the Android Auto templates (buttons, lists, keyboard).
+* `car/CarContent.kt`: the views on the car screen, lists, and touch handling.
+* `car/CarController.kt`: player, web page, mirroring and modes; shared by both routes.
+* `car/CarScreenActivity.kt`: route 1, the parked car activity.
+* `car/CarSurfaceHost.kt`, `CarPresentation.kt`: route 2, drawing onto the Car App Library surface.
+* `car/MainScreen.kt`, `MenuScreen.kt`, `LibraryScreens.kt`: route 2's Android Auto templates (buttons, lists, keyboard).
 * `mirror/`: screen capture (`MediaProjection`), the foreground service, and touch control (`AccessibilityService`).
 * `phone/`: the phone app (remote control, setup guide, share target).
 
@@ -61,13 +68,21 @@ To build it yourself: `./gradlew assembleRelease` (needs JDK 17 and the Android 
 
 ## One-time Android Auto setup
 
-1. Open Android Auto settings: phone **Settings → Connected devices → Connection preferences →
+Requirements for a sideloaded install: an **Android 15 or newer** phone and an up-to-date
+Android Auto (games support reached general availability in September 2026).
+
+1. Update **Android Auto** from the Play Store.
+2. Open Android Auto settings: phone **Settings → Connected devices → Connection preferences →
    Android Auto** (or the button in the AutoCarPlay app).
-2. Scroll down and tap **Version** 10 times, then allow developer settings.
-3. Tap **⋮ → Developer settings** and turn on **Unknown sources**.
-4. Go back, tap **Customize launcher**, and make sure **AutoCarPlay** is ticked.
-5. Connect the phone to the Nexon (USB, or wireless on newer models). **AutoCarPlay** now appears in
-   the Android Auto app launcher on the car screen.
+3. Scroll down and tap **Version** 10 times, then allow developer settings.
+4. Tap **⋮ → Developer settings** and turn on **Unknown sources**.
+5. Go back, tap **Customize launcher**, and make sure **AutoCarPlay** is ticked.
+6. Reconnect the phone to the Nexon (unplug and plug in again). While **parked**, open
+   **AutoCarPlay** from the Android Auto app launcher.
+
+On Android 14 or older, Android Auto won't list a sideloaded AutoCarPlay. The option there is to
+install it through Google Play, for example as a Play Console internal test ($25 one-time developer
+account; internal tests skip review).
 
 In the AutoCarPlay phone app, also allow **video access** and **notifications**.
 
@@ -80,11 +95,12 @@ AutoCarPlay → ⋮ → Allow restricted settings**, then try again.
 ## Using it
 
 * Open **AutoCarPlay** on the car screen. Tap a tile (Phone videos, YouTube, Saved links,
-  Mirror phone) or use **Menu**.
+  Mirror phone). The Play Store version also has a **Menu** button.
 * Tap the picture to use it like a touchscreen. For example, tap the video to show the player
   controls, or tap YouTube's full-screen button.
-* The buttons at the edge change with what's playing: play/pause, stop, ±10 s, fit/fill (videos);
-  back, keyboard, scroll (web); back, home, stop (mirroring).
+* In the car activity, the back and close buttons (top right) leave web pages and mirroring. In the
+  Play Store version, the buttons at the edge change with what's playing: play/pause, stop, ±10 s,
+  fit/fill (videos); back, keyboard, scroll (web); back, home, stop (mirroring).
 * From the phone app you can paste a link and tap **Play on car**, pick a phone video, or open
   YouTube. Requests made before the car screen is open start as soon as you open AutoCarPlay in the car.
 
@@ -95,5 +111,6 @@ AutoCarPlay → ⋮ → Allow restricted settings**, then try again.
 * The car keyboard only works while parked (an Android Auto rule). You can type links on the phone instead.
 * Mirroring needs the phone screen on and unlocked. Turn the phone sideways for a full-width picture.
   Android asks for permission ("Start now") each time mirroring starts.
+* The car activity only runs while parked, and the phone lists AutoCarPlay as a game.
 * Google may change Android Auto in ways that affect sideloaded apps. If AutoCarPlay disappears
   from the car launcher, re-check **Unknown sources** and **Customize launcher**.

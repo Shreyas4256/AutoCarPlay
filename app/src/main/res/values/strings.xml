@@ -6,6 +6,10 @@
 
     <!-- Car screen -->
     <string name="menu">Menu</string>
+    <string name="back">Back</string>
+    <string name="close">Close</string>
+    <string name="loading">Loading…</string>
+    <string name="videos_permission_on_phone">Open AutoCarPlay on your phone and tap “Allow access to phone videos”.</string>
     <string name="help">Help</string>
     <string name="car_home_subtitle">Tap a tile, or use Menu. You can also send videos from the phone app.</string>
     <string name="tile_videos">Phone videos</string>
@@ -85,8 +89,10 @@
     <string name="grant_videos">Allow access to phone videos</string>
     <string name="grant_notifications">Allow notifications</string>
     <string name="section_setup">One-time setup in Android Auto</string>
-    <string name="setup_steps">1. Open Android Auto settings (button below, or phone Settings → Connected devices → Connection preferences → Android Auto).\n2. Scroll to the bottom and tap “Version” 10 times, then allow developer settings.\n3. Tap ⋮ (top right) → Developer settings → turn on “Unknown sources”.\n4. Go back → Customize launcher → make sure AutoCarPlay is ticked.\n5. Connect the phone to your car and open AutoCarPlay on the car screen.\n\nTouch control on Android 13+: if Android says the setting is restricted, open phone Settings → Apps → AutoCarPlay → ⋮ → “Allow restricted settings”, then turn it on again.</string>
+    <string name="setup_steps">1. Update Android Auto from the Play Store. Your phone needs Android 15 or newer (see the note above).\n2. Open Android Auto settings (button below, or phone Settings → Connected devices → Connection preferences → Android Auto).\n3. Scroll to the bottom and tap “Version” 10 times, then allow developer settings.\n4. Tap ⋮ (top right) → Developer settings → turn on “Unknown sources”.\n5. Go back → Customize launcher → make sure AutoCarPlay is ticked.\n6. Unplug and reconnect the phone to the car (or restart the car screen), then open AutoCarPlay from the Android Auto launcher while parked.\n\nAndroid shows AutoCarPlay as a game, because games are the only full-screen apps Android Auto allows when an app is not from the Play Store.\n\nTouch control on Android 13+: if Android says the setting is restricted, open phone Settings → Apps → AutoCarPlay → ⋮ → “Allow restricted settings”, then turn it on again.</string>
     <string name="open_aa_settings">Open Android Auto settings</string>
+    <string name="compat_ok">Your phone runs Android %1$s, which supports full-screen apps on Android Auto.</string>
+    <string name="compat_old">Your phone runs Android %1$s. Android Auto only shows sideloaded full-screen apps on Android 15 or newer. On this phone AutoCarPlay can only appear in the car if it is installed through Google Play (for example a Play Console internal test).</string>
     <string name="android_auto_missing">Android Auto is not installed on this phone</string>
     <string name="invalid_link">That does not look like a link</string>
     <string name="link_saved">Link saved</string>

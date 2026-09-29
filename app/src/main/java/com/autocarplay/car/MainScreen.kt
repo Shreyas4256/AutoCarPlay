@@ -18,28 +18,28 @@ import com.autocarplay.core.CarMode
  */
 class MainScreen(
     carContext: CarContext,
-    private val display: CarDisplayController,
-) : Screen(carContext), CarDisplayController.Navigator {
+    private val controller: CarController,
+) : Screen(carContext), CarController.Navigator {
 
     private val refresh: () -> Unit = { invalidate() }
 
     init {
-        display.navigator = this
+        controller.navigator = this
         CarHub.addListener(refresh)
         lifecycle.addObserver(object : DefaultLifecycleObserver {
             override fun onDestroy(owner: LifecycleOwner) {
                 CarHub.removeListener(refresh)
-                if (display.navigator === this@MainScreen) display.navigator = null
+                if (controller.navigator === this@MainScreen) controller.navigator = null
             }
         })
     }
 
     override fun openPhoneVideos() {
-        screenManager.push(PhoneVideosScreen(carContext, display))
+        screenManager.push(PhoneVideosScreen(carContext, controller))
     }
 
     override fun openLinks() {
-        screenManager.push(LinksScreen(carContext, display))
+        screenManager.push(LinksScreen(carContext, controller))
     }
 
     override fun onGetTemplate(): Template {
@@ -47,38 +47,38 @@ class MainScreen(
         // Only one action in the top strip carries a title; map-strip actions are icon-only.
         val strip = ActionStrip.Builder()
             .addAction(ctx.carAction(R.drawable.ic_menu, ctx.getString(R.string.menu)) {
-                screenManager.push(MenuScreen(ctx, display))
+                screenManager.push(MenuScreen(ctx, controller))
             })
         // PAN must be present for Android Auto to forward drags and taps on the picture.
         val map = ActionStrip.Builder()
             .addAction(Action.Builder(Action.PAN).setIcon(ctx.carIcon(R.drawable.ic_pan)).build())
 
-        when (display.mode) {
+        when (controller.mode) {
             CarMode.HOME -> Unit
             CarMode.VIDEO -> {
-                val playIcon = if (display.isPlaying) R.drawable.ic_pause else R.drawable.ic_play
-                strip.addAction(ctx.carAction(playIcon) { display.togglePlayPause() })
-                strip.addAction(ctx.carAction(R.drawable.ic_stop) { display.stopVideo() })
-                map.addAction(ctx.carAction(R.drawable.ic_rewind) { display.seekBack() })
-                map.addAction(ctx.carAction(R.drawable.ic_forward) { display.seekForward() })
-                map.addAction(ctx.carAction(R.drawable.ic_aspect) { display.toggleZoom() })
+                val playIcon = if (controller.isPlaying) R.drawable.ic_pause else R.drawable.ic_play
+                strip.addAction(ctx.carAction(playIcon) { controller.togglePlayPause() })
+                strip.addAction(ctx.carAction(R.drawable.ic_stop) { controller.stopVideo() })
+                map.addAction(ctx.carAction(R.drawable.ic_rewind) { controller.seekBack() })
+                map.addAction(ctx.carAction(R.drawable.ic_forward) { controller.seekForward() })
+                map.addAction(ctx.carAction(R.drawable.ic_aspect) { controller.toggleZoom() })
             }
             CarMode.WEB -> {
-                strip.addAction(ctx.carAction(R.drawable.ic_back) { display.webBack() })
+                strip.addAction(ctx.carAction(R.drawable.ic_back) { controller.webBack() })
                 strip.addAction(ctx.carAction(R.drawable.ic_keyboard) {
-                    screenManager.push(KeyboardScreen(ctx, display, searchYouTube = true))
+                    screenManager.push(KeyboardScreen(ctx, controller, searchYouTube = true))
                 })
-                strip.addAction(ctx.carAction(R.drawable.ic_close) { display.goHome() })
+                strip.addAction(ctx.carAction(R.drawable.ic_close) { controller.goHome() })
                 // Scroll buttons for car screens that do not report drags.
-                map.addAction(ctx.carAction(R.drawable.ic_scroll_up) { display.webScroll(false) })
-                map.addAction(ctx.carAction(R.drawable.ic_scroll_down) { display.webScroll(true) })
+                map.addAction(ctx.carAction(R.drawable.ic_scroll_up) { controller.webScroll(false) })
+                map.addAction(ctx.carAction(R.drawable.ic_scroll_down) { controller.webScroll(true) })
             }
             CarMode.MIRROR -> {
-                strip.addAction(ctx.carAction(R.drawable.ic_back) { display.mirrorBack() })
-                strip.addAction(ctx.carAction(R.drawable.ic_home) { display.mirrorHome() })
-                strip.addAction(ctx.carAction(R.drawable.ic_stop) { display.stopMirror() })
-                map.addAction(ctx.carAction(R.drawable.ic_scroll_up) { display.mirrorScroll(false) })
-                map.addAction(ctx.carAction(R.drawable.ic_scroll_down) { display.mirrorScroll(true) })
+                strip.addAction(ctx.carAction(R.drawable.ic_back) { controller.mirrorBack() })
+                strip.addAction(ctx.carAction(R.drawable.ic_home) { controller.mirrorHome() })
+                strip.addAction(ctx.carAction(R.drawable.ic_stop) { controller.stopMirror() })
+                map.addAction(ctx.carAction(R.drawable.ic_scroll_up) { controller.mirrorScroll(false) })
+                map.addAction(ctx.carAction(R.drawable.ic_scroll_down) { controller.mirrorScroll(true) })
             }
         }
 
