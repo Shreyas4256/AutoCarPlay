@@ -73,13 +73,15 @@ Main code:
 
 ### Signing
 
-Release APKs are signed with a private key that is **not** in this repository. The build reads it
-from two repository secrets (Settings → Secrets and variables → Actions):
+Release APKs are signed with a private key that is **not** in this repository. Only the `release`
+job, which runs for `main`, can use it: the key is stored as two secrets of the **`release`
+environment** (Settings → Environments → `release`), whose deployment branch rule allows only
+`main`. Branches and pull requests build an unsigned APK without access to the key.
 
 * `SIGNING_KEYSTORE_BASE64`: the PKCS#12 keystore, base64-encoded.
 * `SIGNING_KEYSTORE_PASSWORD`: its password (key alias `autocarplay`).
 
-Without them the build still runs but produces an unsigned APK, and `main` refuses to publish it.
+If the secrets are missing, the `release` job fails instead of publishing an unsigned APK.
 To build it yourself: `./gradlew assembleRelease` (needs JDK 17 and the Android SDK). Set
 `AUTOCARPLAY_KEYSTORE` (path) and `AUTOCARPLAY_KEYSTORE_PASSWORD` to sign with your own key; otherwise
 the APK in `app/build/outputs/apk/release/` is unsigned.
