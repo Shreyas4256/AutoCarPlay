@@ -1,7 +1,9 @@
 package com.autocarplay.core
 
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
+import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class SourcesTest {
@@ -61,6 +63,16 @@ class SourcesTest {
         val site = Sources.requestForQuery("wikipedia.org", searchYouTube = false)!!
         assertEquals("https://wikipedia.org", site.uri)
         assertNull(Sources.requestForQuery("  ", searchYouTube = true))
+    }
+
+    @Test
+    fun onlyWebLinksCountAsWebUrls() {
+        assertTrue(Sources.isWebUrl("https://youtu.be/dQw4w9WgXcQ"))
+        assertTrue(Sources.isWebUrl(" HTTP://example.com/video.mp4"))
+        // Shared text from other apps must not reach local files or content providers.
+        assertFalse(Sources.isWebUrl(Sources.requestFor("file:///data/data/com.autocarplay/x.mp4")!!.uri))
+        assertFalse(Sources.isWebUrl(Sources.requestFor("content://media/external/video/media/12")!!.uri))
+        assertTrue(Sources.isWebUrl(Sources.requestFor("example.com/video.mp4")!!.uri))
     }
 
     @Test

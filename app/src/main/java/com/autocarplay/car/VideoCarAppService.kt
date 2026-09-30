@@ -1,6 +1,7 @@
 package com.autocarplay.car
 
 import android.content.Intent
+import android.content.pm.ApplicationInfo
 import androidx.car.app.AppManager
 import androidx.car.app.CarAppService
 import androidx.car.app.CarToast
@@ -18,9 +19,20 @@ import com.autocarplay.core.CarHub
  */
 class VideoCarAppService : CarAppService() {
 
-    // Accept any Android Auto host (the Play Store build of Android Auto, or a head-unit
-    // emulator such as the Desktop Head Unit).
-    override fun createHostValidator(): HostValidator = HostValidator.ALLOW_ALL_HOSTS_VALIDATOR
+    /**
+     * Only Google's Android Auto / Automotive hosts may connect in release builds. The service
+     * is exported, so accepting any host would let any app on the phone bind to it, drive the
+     * car screen, capture what it shows (including the mirrored phone screen) and, with touch
+     * control on, tap on the phone. Debug builds also accept the Desktop Head Unit and tools.
+     */
+    override fun createHostValidator(): HostValidator =
+        if ((applicationInfo.flags and ApplicationInfo.FLAG_DEBUGGABLE) != 0) {
+            HostValidator.ALLOW_ALL_HOSTS_VALIDATOR
+        } else {
+            HostValidator.Builder(applicationContext)
+                .addAllowedHosts(androidx.car.app.R.array.hosts_allowlist_sample)
+                .build()
+        }
 
     override fun onCreateSession(): Session = VideoSession()
 }
