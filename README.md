@@ -62,13 +62,29 @@ Main code:
 
 1. On your phone, download the latest APK:
    **https://github.com/Shreyas4256/AutoCarPlay/releases/download/apk-main/AutoCarPlay.apk**
-   (every push to `main` rebuilds it with GitHub Actions; other branches publish to their own
-   `apk-<branch>` release on the [Releases](../../releases) page, and each workflow run also
-   keeps the APK as an artifact).
+   (every push to `main` rebuilds it with GitHub Actions; each workflow run also keeps the APK as
+   an artifact).
 2. Open it and allow installing from your browser/file manager.
 
-To build it yourself: `./gradlew assembleRelease` (needs JDK 17 and the Android SDK). The APK is in
-`app/build/outputs/apk/release/`.
+> **Upgrading from 1.2.x or older:** version 1.3.0 is signed with a new, private key, so Android
+> won't install it over the old app. Uninstall AutoCarPlay first, then install the new APK and
+> redo its permissions (touch control, video access, Bluetooth). Only install AutoCarPlay from
+> the link above; never an APK someone sends you.
+
+### Signing
+
+Release APKs are signed with a private key that is **not** in this repository. Only the `release`
+job, which runs for `main`, can use it: the key is stored as two secrets of the **`release`
+environment** (Settings → Environments → `release`), whose deployment branch rule allows only
+`main`. Branches and pull requests build an unsigned APK without access to the key.
+
+* `SIGNING_KEYSTORE_BASE64`: the PKCS#12 keystore, base64-encoded.
+* `SIGNING_KEYSTORE_PASSWORD`: its password (key alias `autocarplay`).
+
+If the secrets are missing, the `release` job fails instead of publishing an unsigned APK.
+To build it yourself: `./gradlew assembleRelease` (needs JDK 17 and the Android SDK). Set
+`AUTOCARPLAY_KEYSTORE` (path) and `AUTOCARPLAY_KEYSTORE_PASSWORD` to sign with your own key; otherwise
+the APK in `app/build/outputs/apk/release/` is unsigned.
 
 ## One-time Android Auto setup
 

@@ -6,9 +6,11 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
+  # Tests and an unsigned APK for every push and pull request. No secrets are used here:
+  # branches and pull requests run build code that has not been merged into main yet.
   build:
     runs-on: ubuntu-latest
     steps:
@@ -25,24 +27,75 @@ jobs:
         run: ./gradlew --no-daemon testReleaseUnitTest assembleRelease
 
       - name: Collect APK
-        run: cp app/build/outputs/apk/release/*.apk AutoCarPlay.apk
+        run: cp app/build/outputs/apk/release/*.apk AutoCarPlay-unsigned.apk
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: AutoCarPlay-unsigned-apk
+          path: AutoCarPlay-unsigned.apk
+
+  # Signs the APK and publishes the phone download link, only for main. The signing key is a
+  # secret of the "release" environment, whose deployment rule only admits the main branch, so
+  # workflows running on other branches cannot read it even if they are edited.
+  release:
+    needs: build
+    if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
+    runs-on: ubuntu-latest
+    environment: release
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - uses: gradle/actions/setup-gradle@v4
+
+      - name: Load signing key
+        env:
+          SIGNING_KEYSTORE_BASE64: ${{ secrets.SIGNING_KEYSTORE_BASE64 }}
+        run: |
+          if [ -z "$SIGNING_KEYSTORE_BASE64" ]; then
+            echo "::error::The release environment has no SIGNING_KEYSTORE_BASE64 secret."
+            exit 1
+          fi
+          printf '%s' "$SIGNING_KEYSTORE_BASE64" | base64 -d > "$RUNNER_TEMP/release.p12"
+          echo "AUTOCARPLAY_KEYSTORE=$RUNNER_TEMP/release.p12" >> "$GITHUB_ENV"
+
+      - name: Signed APK
+        env:
+          AUTOCARPLAY_KEYSTORE_PASSWORD: ${{ secrets.SIGNING_KEYSTORE_PASSWORD }}
+        run: ./gradlew --no-daemon assembleRelease
+
+      - name: Check signature
+        run: |
+          rm -f "$RUNNER_TEMP/release.p12"
+          cp app/build/outputs/apk/release/*.apk AutoCarPlay.apk
+          apksigner="$(ls -d "$ANDROID_HOME"/build-tools/*/ | sort -V | tail -1)apksigner"
+          if ! "$apksigner" verify --print-certs AutoCarPlay.apk > signature.txt 2>&1; then
+            cat signature.txt
+            echo "::error::Refusing to publish an unsigned APK."
+            exit 1
+          fi
+          echo "Signing certificate: $(grep -m1 'SHA-256' signature.txt)" | tee -a "$GITHUB_STEP_SUMMARY"
 
       - uses: actions/upload-artifact@v4
         with:
           name: AutoCarPlay-apk
           path: AutoCarPlay.apk
 
-      # A pre-release per branch gives a direct download link that works on the phone.
       - name: Publish download link
-        if: github.event_name != 'pull_request'
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          TAG="apk-${GITHUB_REF_NAME//\//-}"
+          TAG="apk-main"
           gh release delete "$TAG" --yes --cleanup-tag || true
           gh release create "$TAG" AutoCarPlay.apk \
             --target "$GITHUB_SHA" \
-            --prerelease \
-            --title "AutoCarPlay APK ($GITHUB_REF_NAME)" \
+            --latest \
+            --title "AutoCarPlay APK" \
             --notes "Built from ${GITHUB_SHA::7}. Download AutoCarPlay.apk on your phone and install it. See the README for the Android Auto setup."
           echo "APK: https://github.com/${GITHUB_REPOSITORY}/releases/download/${TAG}/AutoCarPlay.apk" >> "$GITHUB_STEP_SUMMARY"

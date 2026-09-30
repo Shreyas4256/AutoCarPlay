@@ -13,28 +13,30 @@ android {
         applicationId = "com.autocarplay"
         minSdk = 26
         targetSdk = 35
-        versionCode = 4
-        versionName = "1.2.1"
+        versionCode = 5
+        versionName = "1.3.0"
     }
 
     signingConfigs {
-        // A fixed key checked into the repo so every CI build can be installed over the
-        // previous one. It is only meant for sideloading; use your own key for Play Store.
-        create("sideload") {
-            storeFile = file("autocarplay.keystore")
-            storePassword = "autocarplay"
-            keyAlias = "autocarplay"
-            keyPassword = "autocarplay"
+        // The release key is private: CI writes it from GitHub Actions secrets and passes its
+        // location and password in these environment variables. It is never in the repository.
+        // Without them (local builds, pull requests from forks) the release APK is unsigned.
+        val keystore = System.getenv("AUTOCARPLAY_KEYSTORE")?.let { file(it) }?.takeIf { it.isFile }
+        if (keystore != null) {
+            create("release") {
+                storeFile = keystore
+                storeType = "pkcs12"
+                storePassword = System.getenv("AUTOCARPLAY_KEYSTORE_PASSWORD")
+                keyAlias = System.getenv("AUTOCARPLAY_KEY_ALIAS") ?: "autocarplay"
+                keyPassword = System.getenv("AUTOCARPLAY_KEYSTORE_PASSWORD")
+            }
         }
     }
 
     buildTypes {
         release {
             isMinifyEnabled = false
-            signingConfig = signingConfigs.getByName("sideload")
-        }
-        debug {
-            signingConfig = signingConfigs.getByName("sideload")
+            signingConfig = signingConfigs.findByName("release")
         }
     }
 
