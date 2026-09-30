@@ -9,3 +9,8 @@
 /captures
 .externalNativeBuild
 .cxx
+
+# Signing keys must never be committed (the release key lives in GitHub Actions secrets).
+*.keystore
+*.jks
+*.p12

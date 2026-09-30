@@ -21,28 +21,58 @@ jobs:
 
       - uses: gradle/actions/setup-gradle@v4
 
+      # The release signing key exists only in this repository's Actions secrets. Runs without
+      # the secrets (pull requests from forks) build an unsigned APK, which is never published.
+      - name: Load signing key
+        env:
+          SIGNING_KEYSTORE_BASE64: ${{ secrets.SIGNING_KEYSTORE_BASE64 }}
+          SIGNING_KEYSTORE_PASSWORD: ${{ secrets.SIGNING_KEYSTORE_PASSWORD }}
+        run: |
+          if [ -n "$SIGNING_KEYSTORE_BASE64" ] && [ -n "$SIGNING_KEYSTORE_PASSWORD" ]; then
+            printf '%s' "$SIGNING_KEYSTORE_BASE64" | base64 -d > "$RUNNER_TEMP/release.p12"
+            echo "AUTOCARPLAY_KEYSTORE=$RUNNER_TEMP/release.p12" >> "$GITHUB_ENV"
+            echo "Signing key loaded."
+          else
+            echo "::warning::Signing secrets are not available; building an unsigned APK."
+          fi
+
       - name: Unit tests and APK
+        env:
+          AUTOCARPLAY_KEYSTORE_PASSWORD: ${{ secrets.SIGNING_KEYSTORE_PASSWORD }}
         run: ./gradlew --no-daemon testReleaseUnitTest assembleRelease
 
       - name: Collect APK
-        run: cp app/build/outputs/apk/release/*.apk AutoCarPlay.apk
+        run: |
+          cp app/build/outputs/apk/release/*.apk AutoCarPlay.apk
+          rm -f "$RUNNER_TEMP/release.p12"
+          apksigner="$(ls -d "$ANDROID_HOME"/build-tools/*/ | sort -V | tail -1)apksigner"
+          if "$apksigner" verify --print-certs AutoCarPlay.apk > signature.txt 2>&1; then
+            echo "Signing certificate: $(grep -m1 'SHA-256' signature.txt)" | tee -a "$GITHUB_STEP_SUMMARY"
+            echo "APK_SIGNED=true" >> "$GITHUB_ENV"
+          else
+            echo "The APK is not signed." | tee -a "$GITHUB_STEP_SUMMARY"
+          fi
 
       - uses: actions/upload-artifact@v4
         with:
           name: AutoCarPlay-apk
           path: AutoCarPlay.apk
 
-      # A pre-release per branch gives a direct download link that works on the phone.
+      # Only main publishes the phone download link, and only an APK signed with the release key.
       - name: Publish download link
-        if: github.event_name != 'pull_request'
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          TAG="apk-${GITHUB_REF_NAME//\//-}"
+          if [ "$APK_SIGNED" != "true" ]; then
+            echo "::error::Refusing to publish an unsigned APK. Add the SIGNING_KEYSTORE_BASE64 and SIGNING_KEYSTORE_PASSWORD repository secrets."
+            exit 1
+          fi
+          TAG="apk-main"
           gh release delete "$TAG" --yes --cleanup-tag || true
           gh release create "$TAG" AutoCarPlay.apk \
             --target "$GITHUB_SHA" \
-            --prerelease \
-            --title "AutoCarPlay APK ($GITHUB_REF_NAME)" \
+            --latest \
+            --title "AutoCarPlay APK" \
             --notes "Built from ${GITHUB_SHA::7}. Download AutoCarPlay.apk on your phone and install it. See the README for the Android Auto setup."
           echo "APK: https://github.com/${GITHUB_REPOSITORY}/releases/download/${TAG}/AutoCarPlay.apk" >> "$GITHUB_STEP_SUMMARY"
