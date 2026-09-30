@@ -462,6 +462,9 @@ class CarContent(
         with(web.settings) {
             javaScriptEnabled = true
             domStorageEnabled = true
+            // Web pages never need the phone's files or other apps' content.
+            allowFileAccess = false
+            allowContentAccess = false
             mediaPlaybackRequiresUserGesture = false
             loadWithOverviewMode = true
             useWideViewPort = true

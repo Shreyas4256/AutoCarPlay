@@ -16,7 +16,8 @@ class ShareActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         val text = intent?.getStringExtra(Intent.EXTRA_TEXT).orEmpty()
         val title = Sources.cleanSharedTitle(intent?.getStringExtra(Intent.EXTRA_SUBJECT))
-        val request = Sources.requestFor(text, title)
+        // Any app can send text here, so only web links are accepted (no file:// or content://).
+        val request = Sources.requestFor(text, title)?.takeIf { Sources.isWebUrl(it.uri) }
         if (request == null) {
             Toast.makeText(this, R.string.share_no_link, Toast.LENGTH_LONG).show()
         } else {

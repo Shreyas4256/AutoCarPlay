@@ -46,6 +46,12 @@ object Sources {
         }
     }
 
+    /** True for http(s) links: the only kind accepted from other apps, never local files. */
+    fun isWebUrl(url: String): Boolean {
+        val lower = url.trim().lowercase()
+        return lower.startsWith("http://") || lower.startsWith("https://")
+    }
+
     fun youTubeVideoId(url: String): String? {
         val uri = parse(url) ?: return null
         val host = uri.host?.lowercase()?.removePrefix("www.")?.removePrefix("m.") ?: return null

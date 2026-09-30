@@ -194,15 +194,15 @@ class CarController(private val context: Context) : CarScreen, CarContent.Callba
     }
 
     fun mirrorBack() {
-        if (requireTouchControl()) TouchControlService.instance?.back()
+        if (canControlPhone()) TouchControlService.instance?.back()
     }
 
     fun mirrorHome() {
-        if (requireTouchControl()) TouchControlService.instance?.home()
+        if (canControlPhone()) TouchControlService.instance?.home()
     }
 
     fun mirrorScroll(down: Boolean) {
-        if (!requireTouchControl()) return
+        if (!canControlPhone()) return
         val (fromY, toY) = if (down) 0.7f to 0.3f else 0.3f to 0.7f
         onMirrorSwipe(0.5f, fromY, 0.5f, toY, 250)
     }
@@ -273,12 +273,12 @@ class CarController(private val context: Context) : CarScreen, CarContent.Callba
     }
 
     override fun onMirrorTap(x: Float, y: Float) {
-        if (!requireTouchControl()) return
+        if (!canControlPhone()) return
         TouchControlService.instance?.tap(x * MirrorManager.phoneWidth, y * MirrorManager.phoneHeight)
     }
 
     override fun onMirrorSwipe(fromX: Float, fromY: Float, toX: Float, toY: Float, durationMs: Long) {
-        if (!requireTouchControl()) return
+        if (!canControlPhone()) return
         val w = MirrorManager.phoneWidth
         val h = MirrorManager.phoneHeight
         TouchControlService.instance?.swipe(fromX * w, fromY * h, toX * w, toY * h, durationMs)
@@ -496,6 +496,15 @@ class CarController(private val context: Context) : CarScreen, CarContent.Callba
         isZoomed = zoom
         content?.setVideoZoom(zoom)
         CarHub.notifyChanged()
+    }
+
+    /**
+     * Touches are only passed on to the phone while the user is looking at the mirrored phone
+     * screen, i.e. mirroring mode is showing and screen capture (which the user approved) runs.
+     */
+    private fun canControlPhone(): Boolean {
+        if (mode != CarMode.MIRROR || !MirrorManager.isActive) return false
+        return requireTouchControl()
     }
 
     private fun requireTouchControl(): Boolean {

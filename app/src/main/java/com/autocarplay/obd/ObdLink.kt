@@ -30,14 +30,19 @@ class ObdLink private constructor(
 
     /** Sends one command and returns the reply up to the adapter's ">" prompt. */
     fun command(command: String, timeoutMs: Long = TIMEOUT_MS): String {
+        val deadline = SystemClock.uptimeMillis() + timeoutMs
         // Drop anything left over from an earlier command that timed out.
-        while (input.available() > 0) input.read(buffer)
+        while (input.available() > 0) {
+            if (SystemClock.uptimeMillis() > deadline) throw IOException("Adapter keeps sending data")
+            input.read(buffer)
+        }
         output.write("$command\r".toByteArray(Charsets.US_ASCII))
         output.flush()
         val reply = StringBuilder()
-        val deadline = SystemClock.uptimeMillis() + timeoutMs
         while (true) {
             // Polling available() gives a timeout on Bluetooth sockets, whose reads can't time out.
+            // The deadline and size limit also stop a faulty adapter that never stops sending.
+            if (SystemClock.uptimeMillis() > deadline) throw IOException("No reply to $command")
             val available = input.available()
             if (available > 0) {
                 val count = input.read(buffer, 0, minOf(available, buffer.size))
@@ -47,8 +52,8 @@ class ObdLink private constructor(
                     if (c == '>') return reply.toString()
                     reply.append(c)
                 }
+                if (reply.length > MAX_REPLY_CHARS) throw IOException("Reply to $command is too long")
             } else {
-                if (SystemClock.uptimeMillis() > deadline) throw IOException("No reply to $command")
                 Thread.sleep(POLL_MS)
             }
         }
@@ -66,6 +71,9 @@ class ObdLink private constructor(
         const val TIMEOUT_MS = 3_000L
         private const val POLL_MS = 5L
         private const val CONNECT_TIMEOUT_MS = 8_000
+
+        /** Far longer than any real reply (a full trouble-code list is a few hundred characters). */
+        private const val MAX_REPLY_CHARS = 4_096
 
         /** Serial port profile, which Bluetooth ELM327 adapters use. */
         private val SPP_UUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB")
